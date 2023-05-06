@@ -141,6 +141,40 @@ public class DiskScheduler {
         double averageSeekTime = (double) totalSeekTime / numRequestsServiced;
         System.out.println("F-SCAN: Average seek time: " + averageSeekTime);
     }
+    public void N_SCAN() {
+    int currentPosition = this.startingPosition;
+    int totalSeekTime = 0;
+    int numRequestsServiced = 0;
+    List<Integer> requestsList = new ArrayList<>(requestsQueue);
+    requestsList.add(0);
+    requestsList.add(requestsList.size(), 9999); // assuming max request is 9999
+    Collections.sort(requestsList);
+    int index = requestsList.indexOf(currentPosition);
+    boolean direction = true; // true = right, false = left
+    int n = 5; // number of requests to service in one direction before switching
+    int requestsServiced = 0;
+    while (!requestsQueue.isEmpty()) {
+        if (index == requestsList.size() - 1 || index == 0 || requestsServiced == n) {
+            direction = !direction;
+            requestsServiced = 0;
+        }
+        if (direction) {
+            index++;
+        } else {
+            index--;
+        }
+        int nextRequest = requestsList.get(index);
+        int seekTime = Math.abs(nextRequest - currentPosition);
+        totalSeekTime += seekTime;
+        numRequestsServiced++;
+        System.out.println("Servicing request " + nextRequest + " (seek time: " + seekTime + ")");
+        currentPosition = nextRequest;
+        requestsQueue.remove(nextRequest);
+        requestsServiced++;
+    }
+    double averageSeekTime = (double) totalSeekTime / numRequestsServiced;
+    System.out.println("N-SCAN: Average seek time: " + averageSeekTime);
+}
 
     
 }
